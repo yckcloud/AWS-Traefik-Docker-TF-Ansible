@@ -1,0 +1,50 @@
+---
+# Update and upgrade packages
+- name: Update and upgrade packages
+  apt:
+    update_cache: yes
+    upgrade: yes
+    cache_valid_time: 3600
+
+# Install required packages
+- name: Install required packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+
+# Add Docker GPG key
+- name: Add Docker GPG key
+  shell: >
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
+    sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+# Add Docker repository
+- name: Add Docker repository
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+    state: present
+
+# Update apt after adding Docker repository
+- name: Update apt after adding Docker repository
+  apt:
+    update_cache: yes
+
+# Install Docker
+- name: Install Docker
+  apt:
+    name: 
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+
+# Install Docker Compose
+- name: Install Docker Compose
+  apt:
+    name: docker-compose
+    state: present

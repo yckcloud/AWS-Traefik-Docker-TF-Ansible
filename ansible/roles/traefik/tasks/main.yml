@@ -1,0 +1,47 @@
+#Setup Traefik with Docker Compose
+  
+# Description: Creates the directory /opt/docker/traefik to store Traefik configuration.  
+- name: Create directory for Traefik
+  file:
+    path: /opt/docker/traefik
+    state: directory
+  become_user: root
+
+ # Description: Creates the directory /opt/docker/traefik/auth to store Traefik password configuration.  
+- name: Create directory for Traefik auth
+  file:
+    path: /opt/docker/traefik/auth
+    state: directory
+  become_user: root
+
+# Description: Creates the file .htpasswd to store secure password
+- name: Create file for Traefik auth password
+  file:
+    path: /opt/docker/traefik/auth/htpasswd
+    state: touch
+  become_user: root
+
+# Description: Copies the template file htpasswd.j2 to create the password file for traefik
+- name: Copy htpassword.js to .htpasswd
+  template:
+    src: ./templates/htpasswd.j2
+    dest: /opt/docker/traefik/auth/htpasswd
+
+# Description: Copies the template file traefik.j2 to create the Docker Compose configuration file docker-compose.yml in /opt/docker/traefik.
+- name: Copy traefik.j2 to docker-compose.yml
+  template:
+    src: ./templates/traefik.j2
+    dest: /opt/docker/traefik/docker-compose.yml
+  become_user: root
+
+- name: Create external network
+  command: docker network create yckcloud
+  become_user: root
+  ignore_errors: true
+
+# Description: Runs 'docker-compose up -d' to start Traefik in detached mode, ensuring that the command is executed in the /opt/docker/traefik directory.
+- name: Run docker-compose up -d
+  command: docker-compose up -d
+  become_user: root
+  args:
+    chdir: /opt/docker/traefik

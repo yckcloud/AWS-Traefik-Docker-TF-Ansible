@@ -1,0 +1,19 @@
+---
+- hosts: awsdockernodes
+  become: true
+  gather_facts: true
+  order: sorted
+
+  tasks:
+
+    - name: Execute dependencies role
+      include_role:
+        name: dependencies
+      vars:
+      register: dependencies_result
+
+    - name: Execute traefik role
+      include_role:
+        name: traefik
+      vars:
+      register: traefik_result
